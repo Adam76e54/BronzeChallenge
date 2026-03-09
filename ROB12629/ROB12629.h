@@ -18,13 +18,13 @@ class ROB12629{
     //requires us to feed an ISR to it
     void begin(void (*ISR)()){
       if(pin_ != 2 && pin_ != 3){
-        Serial.println("you're not using interrupt pins");
+        Serial.println("You're not using interrupt pins !!!");
       }
       pinMode(pin_, INPUT_PULLUP);
       attachInterrupt(digitalPinToInterrupt(pin_), ISR, RISING);
     }
-    //NOTE: the reason you can' have an ISR method is because something like func() will compile to func(Class* this) when you call it
-    //I.e. it autogenerates a parameter. An ISR must have no parameters so needs to be a "free" function (not attached to an instance of a class)
+    //NOTE: the reason you can' have an ISR method is because C++ always implicitly passes *this. E.g. Class::func() calls will always be fed Class::func(this)
+    //so it autogenerates a parameter. An ISR must have no parameters so needs to be a "free" function (not attached to an instance of a class)
 
     //we'll use this inside of a globally defined ISR
     void increment(){
