@@ -4,7 +4,7 @@
 constexpr uint8_t N = 200;
 
 // Networking objects
-Buffer<N> inBuffer;
+Buffer<N> inBuffer, outBuffer;
 WiFiServer server(wifi::PORT);
 WiFiClient GUI;
 
@@ -25,7 +25,10 @@ void send(void *);
 TaskHandle_t readHandle, senseHandle, sendHandle;
 
 // Set up semaphores (I think we just need a mutex?)
-SemaphoreHandle_t sensorMutex;
+SemaphoreHandle_t GUIMutex;
+
+// NOTE: We'll need to sort out the GUI.print() in random sections of code. We can use a mutex and lock/unlock but I think we'd
+// prefer using an outBuffer to write into locally, then set up a mutex around that local buffer (local to the arduino, that is)
 
 void setup() {
   // Set up serial for debugging
