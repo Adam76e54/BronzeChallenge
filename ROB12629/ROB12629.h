@@ -8,10 +8,10 @@ class ROB12629{
     volatile unsigned long counter_;
     unsigned long lastCounter_;
     unsigned long lastTime_;
-    double rpm_;
-    static constexpr float COUNTS_PER_REV_ = 8.0f; // apparently there's 8 counts per revolution 
+    double rps_; //revs per second
+    static constexpr float COUNTS_PER_REV_ = 4.0f; // apparently there's 8 counts per revolution 
   public:
-    ROB12629(uint8_t pin) : pin_(pin), counter_(0), lastCounter_(0), lastTime_(0), rpm_(0){
+    ROB12629(uint8_t pin) : pin_(pin), counter_(0), lastCounter_(0), lastTime_(0), rps_(0){
       //empty
     }
 
@@ -49,23 +49,23 @@ class ROB12629{
       unsigned int dc = counter_ - lastCounter_;
       // Handle wraparound
       if(lastCounter_ > counter){
-        dc = (counter + 255) - lastCounter_;
+        dc = (counter_ + 255) - lastCounter_;
       }
       interrupts();
 
       lastCounter_ = counter_;
 
       if(dc == 0){
-        rpm_ = 0;
+        rps_ = 0;
         return;
       }
 
       float revs = (float)dc / COUNTS_PER_REV_;
       double dt_s = dt_m * 1e-6f;//convert mircos to seconds;
-      rpm_ = (revs/dt_s) * 60.0f;
+      rps_ = (revs/dt_s) * 60.0f;
     }
 
-    double rpm() const{
-      return rpm_;
+    double revsPerSecond() const{
+      return rps_;
     }
 };

@@ -6,12 +6,32 @@ class CD4021 {
 
     uint8_t lastCounter_;
     unsigned long lastTime_;
-    double rpm_;
+    double rps_;
 
-    static constexpr float COUNTS_PER_REV_ = 8.0f; // apparently there's 8 counts per revolution 
+    static constexpr float COUNTS_PER_REV_ = 4.0f; // apparently there's 8 counts per revolution 
 
   public:
 
+    CD4021(uint8_t clock, uint8_t data, uint8_t latch) : 
+      clock_(clock)
+      , data_(data)
+      , latch_(latch)
+      , lastCounter_(0)
+      , lastTime_(0)
+      , rps_(0) {}
+
+    void begin() {
+      pinMode(clock_, OUTPUT);
+      pinMode(latch_, OUTPUT);
+      pinMode(data_, INPUT);
+      digitalWrite(clock_, LOW);
+      digitalWrite(latch_, LOW);
+      lastTime_ = micros();
+    }
+
+    double revsPerSecond() const{
+      return rps_;
+    }
     void update(uint8_t counter, unsigned long interval_microseconds){
       auto now = micros();
       unsigned long dt_micro = now - lastTime_;
@@ -30,23 +50,22 @@ class CD4021 {
       lastCounter_ = counter;
 
       if(dc == 0){
-        rpm_ = 0;
+        rps_ = 0;
         return;
       }
 
       float revs = (float)dc / COUNTS_PER_REV_;
       double dt_s = dt_micro * 1e-6f;//convert micros to seconds;b
-      rpm_ = (revs/dt_s) * 60.0f;
+      rps_ = (revs/dt_s);
     }
 
     void read(unsigned long interval_microseconds){
       // This is the custom function the lecturer suggested using (although I've made it cleaner)
       
       // - Set up the CD4021 -
-      // Get snapshot from CD4040
+      // Get snapshot from CD4040. The clock speed is much faster than arduino so there's no need for using delays
       digitalWrite(latch_, 1);
-      // Wait a microsecond
-      delayMicroseconds(1);
+
       // Force the CD4021 to stop changing for a little bit
       digitalWrite(latch_, 0);
       
