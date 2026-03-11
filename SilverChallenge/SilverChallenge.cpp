@@ -4,7 +4,7 @@
 
 // Declaration of Interrupt Service Routines
 void leftISR(); void rightISR();
-ROB12629 leftEncoder(2), rightEncoder(3); // THIS NEEDS TO BE CHANGED.
+ROB12629 leftEncoder(2);
 
 // Tasks (for scheduler to handle)
 void telemetry(void *);
@@ -90,12 +90,15 @@ void sense(void *parameters){
   constexpr float CIRCUMFERENCE = 20.4, DIAMETER = 6.5, AXLE = 14.5;
 
   // Hardware objects
-  HCSR04 ears(5, 4); // PINS NEED TO BE CHANGED
+  HCSR04 ears(8, 3); // PINS NEED TO BE CHANGED
   L293D driver(6,7,11,12,9,10);
+  CD4021 shifter(4, 5, 13);
 
   // Set up hardware
   driver.begin();
   ears.begin();
+  shifter.begin();
+
   // We pass ISRs to the encoders
   leftEncoder.begin(leftISR);
   rightEncoder.begin(rightISR);
