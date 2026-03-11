@@ -11,3 +11,4 @@
 #include "Buffer.h"
 #include "StateVariables.h"
 #include "Commands.h"
+#include "CD4021.h"
