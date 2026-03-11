@@ -22,6 +22,11 @@ class CD4021 {
       // We'll be computing dc/dt to get rpm 
       unsigned int dc = counter - lastCounter_;
 
+      // Handle wraparound
+      if(lastCounter_ > counter){
+        dc = (counter + 255) - lastCounter_;
+      }
+
       lastCounter_ = counter;
 
       if(dc == 0){

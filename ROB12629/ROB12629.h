@@ -47,6 +47,10 @@ class ROB12629{
 
       noInterrupts();
       unsigned int dc = counter_ - lastCounter_;
+      // Handle wraparound
+      if(lastCounter_ > counter){
+        dc = (counter + 255) - lastCounter_;
+      }
       interrupts();
 
       lastCounter_ = counter_;
