@@ -6,9 +6,9 @@ class ROB12629{
   private:
     uint8_t pin_;//one digital pin
     volatile unsigned long counter_;
-    volatile unsigned long lastCounter_;
-    volatile unsigned long lastTime_;
-    volatile double rpm_;
+    unsigned long lastCounter_;
+    unsigned long lastTime_;
+    double rpm_;
     static constexpr float COUNTS_PER_REV_ = 8.0f; // apparently there's 8 counts per revolution 
   public:
     ROB12629(uint8_t pin) : pin_(pin), counter_(0), lastCounter_(0), lastTime_(0), rpm_(0){
@@ -26,8 +26,8 @@ class ROB12629{
     //NOTE: the reason you can' have an ISR method is because C++ always implicitly passes *this. E.g. Class::func() calls will always be fed Class::func(this)
     //so it autogenerates a parameter. An ISR must have no parameters so needs to be a "free" function (not attached to an instance of a class)
 
-    //we'll use this inside of a globally defined ISR
     void increment(){
+    //we'll use this inside of a globally defined ISR
       counter_++;
     }
 
