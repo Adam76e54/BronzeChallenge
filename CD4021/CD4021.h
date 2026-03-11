@@ -12,11 +12,11 @@ class CD4021 {
 
   public:
 
-    void update(uint8_t counter, unsigned long interval){
+    void update(uint8_t counter, unsigned long interval_microseconds){
       auto now = micros();
       unsigned long dt_micro = now - lastTime_;
 
-      if(dt_micro < interval) return;//only update if time interval is large enough
+      if(dt_micro < interval_microseconds) return;//only update if time interval is large enough
       lastTime_ = now;
 
       // We'll be computing dc/dt to get rpm 
@@ -30,11 +30,11 @@ class CD4021 {
       }
 
       float revs = (float)dc / COUNTS_PER_REV_;
-      double dt_s = dt_micro * 1e-6f;//convert micros to seconds;
+      double dt_s = dt_micro * 1e-6f;//convert micros to seconds;b
       rpm_ = (revs/dt_s) * 60.0f;
     }
 
-    void read(unsigned long interval){
+    void read(unsigned long interval_microseconds){
       // This is the custom function the lecturer suggested using (although I've made it cleaner)
       
       // - Set up the CD4021 -
@@ -46,10 +46,10 @@ class CD4021 {
       digitalWrite(latch_, 0);
       
       // - Perform the actual shift in -
-      byte data = 0;
-      for (uint8_t i = 7; i >= 0; --i){
+      uint8_t data = 0;
+      for (int8_t i = 7; i >= 0; --i){
         digitalWrite(clock_, 0);
-        delayMicroSeconds(0.2);
+        // delayMicroseconds(1); // We probably don't need this because the CD4021 is much faster than sam anyway
         uint8_t bit = digitalRead(this->data_);
 
         // Flip the appropriate bit
@@ -64,6 +64,6 @@ class CD4021 {
         Serial.println(data, BIN);
       }
 
-      update(data, interval);
+      update(data, interval_microseconds);
     }
 }
