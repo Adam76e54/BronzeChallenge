@@ -6,11 +6,11 @@ class ROB12629{
   private:
     uint8_t pin_;//one digital pin
     volatile unsigned long counter_;
-    unsigned long lastCounter_;
+    unsigned long lastCounter_, lastTime_;
     double rps_; //revs per second
     static constexpr float COUNTS_PER_REV_ = 4.0f; // apparently there's 8 counts per revolution 
   public:
-    ROB12629(uint8_t pin) : pin_(pin), counter_(0), lastCounter_(0), rps_(0){
+    ROB12629(uint8_t pin) : pin_(pin), counter_(0), lastCounter_(0), lastTime_(0), rps_(0){
       //empty
     }
 
@@ -19,6 +19,8 @@ class ROB12629{
       if(pin_ != 2 && pin_ != 3){
         Serial.println("You're not using interrupt pins !!!");
       }
+
+      lastTime_ = micros();
       pinMode(pin_, INPUT_PULLUP);
       attachInterrupt(digitalPinToInterrupt(pin_), ISR, RISING);
     }
@@ -38,26 +40,29 @@ class ROB12629{
       return lastCounter_;
     }
 
-    void update(unsigned long &lastTime, unsigned long interval){
+    void update(unsigned long interval){
       auto now = micros();
-      unsigned long dt_m = now - lastTime;
-      if(dt_m < interval) return;//only update if over the interval
-      lastTime = now;
+      unsigned long dt_m = now - lastTime_;
 
       noInterrupts();
-      unsigned int dc = counter_ - lastCounter_;
+      unsigned int count = counter_;
       interrupts();
 
-      lastCounter_ = counter_;
+      if(dt_m >= interval){
+        unsigned long dc = count - lastCounter_;
 
-      if(dc == 0){
-        rps_ = 0;
-        return;
+        lastTime_ = now;
+        lastCounter_ = counter_;
+
+        if(dc == 0){
+          rps_ = 0;
+          return;
+        }
+
+        float revs = (float)dc / COUNTS_PER_REV_;
+        double dt_s = dt_m * 1e-6f;//convert mircos to seconds;
+        rps_ = (revs/dt_s) * 60.0f;
       }
-
-      float revs = (float)dc / COUNTS_PER_REV_;
-      double dt_s = dt_m * 1e-6f;//convert mircos to seconds;
-      rps_ = (revs/dt_s) * 60.0f;
     }
 
     double revsPerSecond() const{
